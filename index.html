@@ -45,13 +45,37 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
 
+    <!-- MOBILE TOP BAR HEADER (Visible only on mobile/tablet) -->
+    <header class="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 border-b border-slate-800 shadow-md">
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleSidebar(true)" class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <span class="font-extrabold text-base tracking-tight">SqueakyClean</span>
+        </div>
+        <!-- Quick Stats Indicators for Mobile Header -->
+        <div class="flex items-center space-x-3 text-xs font-bold">
+            <span class="text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
+                <i class="fa-solid fa-star"></i>
+                <span id="mobile-score-display">0</span> pts
+            </span>
+            <span id="mobile-streak-display" class="text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
+                <i class="fa-solid fa-fire"></i>
+                <span>5d</span>
+            </span>
+        </div>
+    </header>
+
+    <!-- MOBILE DRAWER BACKDROP OVERLAY -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-45 hidden md:hidden transition-all duration-300"></div>
+
     <!-- OVERALL CONTAINER: SIDEBAR + MAIN LAYOUT -->
     <div class="flex-1 flex flex-col md:flex-row min-h-screen">
 
         <!-- ========================================== -->
-        <!-- SIDEBAR PANEL (Left Side on Desktop)       -->
+        <!-- SIDEBAR PANEL (Drawer on mobile, left-docked on desktop) -->
         <!-- ========================================== -->
-        <aside class="w-full md:w-80 bg-slate-900 text-white flex flex-col border-r border-slate-800 shrink-0">
+        <aside id="sidebar-panel" class="fixed md:static inset-y-0 left-0 w-80 bg-slate-900 text-white flex flex-col border-r border-slate-800 shrink-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <!-- Brand / Logo Area -->
             <div class="p-6 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
@@ -60,9 +84,13 @@
                     </div>
                     <div>
                         <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">SqueakyClean</h1>
-                        <p class="text-[10px] font-medium text-emerald-400 tracking-wider uppercase">Chore Engine v1.3</p>
+                        <p class="text-[10px] font-medium text-emerald-400 tracking-wider uppercase">Chore Engine v1.4</p>
                     </div>
                 </div>
+                <!-- Close Button inside mobile drawer -->
+                <button onclick="toggleSidebar(false)" class="md:hidden w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-750 flex items-center justify-center text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
             <!-- Profile & Score Summary -->
@@ -82,7 +110,7 @@
                     </div>
                 </div>
 
-                <!-- Stats Grid inside Sidebar -->
+                <!-- Stats Grid inside Sidebar (Hidden on mobile top since they are in the header bar) -->
                 <div class="grid grid-cols-2 gap-3 mt-4">
                     <div class="bg-slate-850/50 border border-slate-800/80 rounded-xl p-3 text-center bg-slate-800/40">
                         <span class="block text-[10px] text-slate-400 uppercase font-bold tracking-wider">Level Score</span>
@@ -171,37 +199,38 @@
         <!-- ========================================== -->
         <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
             
-            <!-- Sticky Dashboard Top Header -->
-            <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+            <!-- Sticky Dashboard Top Header (Desktop only padding adjustment) -->
+            <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 sm:px-6 py-4 flex items-center justify-between shadow-sm md:shadow-none">
                 <div>
                     <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider" id="calendar-day-subtitle">Today's Schedule</h2>
-                    <h3 class="text-xl font-bold text-slate-900" id="current-calendar-date">Loading date...</h3>
+                    <h3 class="text-base sm:text-xl font-bold text-slate-900" id="current-calendar-date">Loading date...</h3>
                 </div>
 
                 <!-- Action Button -->
-                <button id="reset-day-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold py-2 px-3.5 rounded-lg transition-all duration-150 flex items-center gap-1.5 border border-slate-200">
+                <button id="reset-day-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold py-2.5 px-3 rounded-lg transition-all duration-150 flex items-center gap-1.5 border border-slate-200">
                     <i class="fa-solid fa-rotate-left"></i>
-                    <span>Reset Day Progress</span>
+                    <span class="hidden sm:inline">Reset Day Progress</span>
+                    <span class="sm:hidden">Reset</span>
                 </button>
             </header>
 
             <!-- Dashboard Inner Content -->
-            <div class="p-6 space-y-6 max-w-5xl w-full mx-auto">
+            <div class="p-4 sm:p-6 space-y-6 max-w-5xl w-full mx-auto">
                 
                 <!-- PROGRESS OVERVIEW BANNER CARD -->
-                <div id="progress-banner-card" class="bg-gradient-to-r from-slate-900 via-teal-950 to-emerald-950 text-white rounded-3xl p-6 shadow-xl shadow-teal-950/10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden transition-all duration-300">
+                <div id="progress-banner-card" class="bg-gradient-to-r from-slate-900 via-teal-950 to-emerald-950 text-white rounded-3xl p-5 sm:p-6 shadow-xl shadow-teal-950/10 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden transition-all duration-300">
                     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent)] pointer-events-none"></div>
                     
-                    <div class="space-y-2 relative z-10 text-center md:text-left">
+                    <div class="space-y-2 relative z-10 text-center lg:text-left">
                         <span id="progress-banner-badge" class="bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full border border-emerald-500/30">Chore Progress</span>
-                        <h4 id="progress-banner-title" class="text-xl font-extrabold md:text-2xl mt-1">Consistency creates clean spaces</h4>
-                        <p id="progress-banner-desc" class="text-sm text-slate-300">Complete tasks to clean up your virtual apartment in real-time!</p>
+                        <h4 id="progress-banner-title" class="text-lg sm:text-xl lg:text-2xl font-extrabold mt-1">Consistency creates clean spaces</h4>
+                        <p id="progress-banner-desc" class="text-xs sm:text-sm text-slate-300">Complete tasks to clean up your virtual apartment in real-time!</p>
                     </div>
 
                     <!-- Progress Stats Group -->
-                    <div class="flex items-center gap-4 shrink-0 relative z-10 w-full md:w-auto">
-                        <!-- Progress Radial Dial replacement / Modern linear representation -->
-                        <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-4 rounded-2xl w-full md:w-48 space-y-3">
+                    <div class="flex items-center gap-4 shrink-0 relative z-10 w-full lg:w-auto">
+                        <!-- Progress linear representation -->
+                        <div class="bg-white/5 border border-white/10 backdrop-blur-sm p-4 rounded-2xl w-full lg:w-48 space-y-3">
                             <div class="flex justify-between items-center text-xs">
                                 <span class="font-bold text-slate-300">Completed Tracker</span>
                                 <span class="font-extrabold text-emerald-400 text-sm" id="progress-percentage">0%</span>
@@ -218,12 +247,12 @@
                 <!-- MAIN WORKSPACE ROWS -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                    <!-- LEFT COLUMN: WORK CHECKLISTS -->
+                    <!-- LEFT COLUMN: TWO WORK LISTS -->
                     <div class="lg:col-span-2 space-y-6">
 
                         <!-- CARD A: DAILY ESSENTIALS -->
                         <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                            <div class="bg-slate-50 border-b border-slate-200/60 px-6 py-4 flex items-center justify-between">
+                            <div class="bg-slate-50 border-b border-slate-200/60 px-4 sm:px-6 py-4 flex items-center justify-between">
                                 <div class="flex items-center space-x-2.5">
                                     <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                                         <i class="fa-solid fa-feather"></i>
@@ -235,14 +264,14 @@
                                 </div>
                                 <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">10-15 Mins</span>
                             </div>
-                            <div class="p-6 space-y-3" id="daily-essentials-checklist">
+                            <div class="p-4 sm:p-6 space-y-3" id="daily-essentials-checklist">
                                 <!-- JS will populate list here -->
                             </div>
                         </section>
 
                         <!-- CARD B: DYNAMIC DAILY FOCUS CHORES -->
                         <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                            <div class="bg-slate-50 border-b border-slate-200/60 px-6 py-4 flex items-center justify-between">
+                            <div class="bg-slate-50 border-b border-slate-200/60 px-4 sm:px-6 py-4 flex items-center justify-between">
                                 <div class="flex items-center space-x-2.5">
                                     <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
                                         <i class="fa-solid fa-bolt"></i>
@@ -257,14 +286,14 @@
                                 </div>
                                 <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">15-20 Mins</span>
                             </div>
-                            <div class="p-6 space-y-3" id="focus-tasks-checklist">
+                            <div class="p-4 sm:p-6 space-y-3" id="focus-tasks-checklist">
                                 <!-- JS will populate list here -->
                             </div>
                         </section>
 
-                        <!-- CARD C: ONE-TIME CHORES (NEW!) -->
+                        <!-- CARD C: ONE-TIME CHORES -->
                         <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                            <div class="bg-slate-50 border-b border-slate-200/60 px-6 py-4 flex items-center justify-between">
+                            <div class="bg-slate-50 border-b border-slate-200/60 px-4 sm:px-6 py-4 flex items-center justify-between">
                                 <div class="flex items-center space-x-2.5">
                                     <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
                                         <i class="fa-solid fa-calendar-check"></i>
@@ -279,7 +308,7 @@
                                     <span>Clear Completed</span>
                                 </button>
                             </div>
-                            <div class="p-6 space-y-3" id="onetime-tasks-checklist">
+                            <div class="p-4 sm:p-6 space-y-3" id="onetime-tasks-checklist">
                                 <!-- JS will populate list here -->
                             </div>
                         </section>
@@ -290,7 +319,7 @@
                     <div class="space-y-6">
 
                         <!-- CHORE FOCUS TIMER -->
-                        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+                        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 space-y-4">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2.5">
                                     <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -312,7 +341,7 @@
                                 </div>
                             </div>
 
-                            <!-- Timer Presets -->
+                            <!-- Timer Presets (Tight paddings for small viewports) -->
                             <div class="grid grid-cols-4 gap-1.5 text-center">
                                 <button onclick="setTimerPreset(10)" id="timer-preset-10" class="timer-preset-btn py-1.5 border border-slate-200 rounded-lg text-xs font-bold transition hover:bg-slate-50">10m</button>
                                 <button onclick="setTimerPreset(15)" id="timer-preset-15" class="timer-preset-btn py-1.5 border border-slate-200 rounded-lg text-xs font-bold transition hover:bg-slate-50">15m</button>
@@ -333,7 +362,7 @@
                         </section>
 
                         <!-- CARD D: QUICK ADD CUSTOM TASKS -->
-                        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+                        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 space-y-4">
                             <div class="flex items-center space-x-2.5">
                                 <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                                     <i class="fa-solid fa-plus-circle"></i>
@@ -549,6 +578,20 @@
         let timerSecondsLeft = timerTotalSeconds;
         let isTimerRunning = false;
 
+        // Toggle Responsive Sidebar for Mobile
+        function toggleSidebar(shouldOpen) {
+            const sidebar = document.getElementById('sidebar-panel');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            
+            if (shouldOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
         // Synthesize a beautiful, premium, metallic arpeggio sound using Web Audio API (totally self-contained)
         function playChimeEffect() {
             try {
@@ -626,7 +669,7 @@
             if (localSaved) {
                 appState = JSON.parse(localSaved);
 
-                // Migration to v1.3 mutable arrays
+                // Migration to mutable arrays
                 if (!appState.essentials || appState.essentials.length === 0) {
                     appState.essentials = JSON.parse(JSON.stringify(dailyEssentialsDb));
                 }
@@ -741,13 +784,13 @@
             const bannerDesc = document.getElementById('progress-banner-desc');
 
             if (isVacation) {
-                banner.className = "bg-gradient-to-r from-amber-500 via-orange-600 to-rose-700 text-white rounded-3xl p-6 shadow-xl shadow-orange-950/10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden transition-all duration-300";
+                banner.className = "bg-gradient-to-r from-amber-500 via-orange-600 to-rose-700 text-white rounded-3xl p-5 sm:p-6 shadow-xl shadow-orange-950/10 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden transition-all duration-300";
                 bannerBadge.className = "bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full border border-white/30";
                 bannerBadge.innerText = "Streak Frozen ❄️";
                 bannerTitle.innerText = "Enjoy your well-deserved break!";
                 bannerDesc.innerText = "Vacation mode is active. Your streak is completely safe while you recharge.";
             } else {
-                banner.className = "bg-gradient-to-r from-slate-900 via-teal-950 to-emerald-950 text-white rounded-3xl p-6 shadow-xl shadow-teal-950/10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden transition-all duration-300";
+                banner.className = "bg-gradient-to-r from-slate-900 via-teal-950 to-emerald-950 text-white rounded-3xl p-5 sm:p-6 shadow-xl shadow-teal-950/10 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden transition-all duration-300";
                 bannerBadge.className = "bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full border border-emerald-500/30";
                 bannerBadge.innerText = "Chore Progress";
                 bannerTitle.innerText = "Consistency creates clean spaces";
@@ -878,7 +921,10 @@
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md' 
                     : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
                 }`;
-                navButton.onclick = () => selectWeekday(day);
+                navButton.onclick = () => {
+                    selectWeekday(day);
+                    toggleSidebar(false); // Auto close sidebar drawer on mobile after selection
+                };
 
                 // Content inside button
                 const labelDiv = document.createElement('div');
@@ -961,7 +1007,7 @@
 
             if (activeOneTime.length === 0) {
                 oneTimeList.innerHTML = `
-                    <div class="text-center py-6 text-slate-450 border border-dashed border-slate-200 rounded-xl bg-slate-50/20">
+                    <div class="text-center py-6 text-slate-450 border border-dashed border-slate-200 rounded-xl bg-slate-50/25 p-4">
                         <p class="text-xs font-semibold text-slate-400">No active one-time chores.</p>
                         <p class="text-[10px] text-slate-400 mt-0.5">Use the Quick Injector below to add an ad-hoc task!</p>
                     </div>
@@ -979,24 +1025,29 @@
 
             const row = document.createElement('div');
             row.id = `row-${task.id}`;
-            row.className = `group flex items-center justify-between p-4 rounded-xl border transition-all duration-150 relative overflow-hidden ${
+            row.className = `group flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition-all duration-150 relative overflow-hidden ${
                 isCompleted 
                 ? 'bg-slate-50/70 border-slate-200 text-slate-400' 
                 : 'bg-white hover:bg-slate-50/50 hover:border-emerald-200 border-slate-200 text-slate-800 shadow-sm'
             }`;
 
-            // Checkbox and label wrapper (separated to prevent clicks from checking checking tasks on edit/delete)
+            // Checkbox and label wrapper (Separated interactive clickZone to prevent collision with buttons)
             const leftBlock = document.createElement('div');
-            leftBlock.className = "flex items-start space-x-3.5 flex-1 select-none pr-2";
+            leftBlock.className = "flex items-start space-x-3 flex-1 select-none pr-1";
 
-            const checkboxWrapper = document.createElement('label');
-            checkboxWrapper.className = "flex items-start space-x-3.5 cursor-pointer w-full";
+            const clickZone = document.createElement('div');
+            clickZone.className = "flex items-start space-x-3.5 cursor-pointer w-full py-0.5";
+            clickZone.onclick = () => toggleChore(task.id, task.points);
 
             const checkbox = document.createElement('input');
             checkbox.type = "checkbox";
             checkbox.checked = isCompleted;
-            checkbox.className = "w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 mt-0.5 transition cursor-pointer";
-            checkbox.onchange = () => toggleChore(task.id, task.points);
+            // Slightly larger touch target on mobile
+            checkbox.className = "w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 mt-0.5 transition cursor-pointer shrink-0";
+            checkbox.onchange = (e) => {
+                e.stopPropagation();
+                toggleChore(task.id, task.points);
+            };
 
             const labelContent = document.createElement('div');
             
@@ -1014,29 +1065,30 @@
                 labelContent.appendChild(badge);
             }
 
-            checkboxWrapper.appendChild(checkbox);
-            checkboxWrapper.appendChild(labelContent);
-            leftBlock.appendChild(checkboxWrapper);
+            clickZone.appendChild(checkbox);
+            clickZone.appendChild(labelContent);
+            leftBlock.appendChild(clickZone);
 
             // Right block wrapper containing action buttons on hover & points badge
             const rightBlock = document.createElement('div');
-            rightBlock.className = "flex items-center space-x-3 shrink-0";
+            rightBlock.className = "flex items-center space-x-2 shrink-0";
 
             // Points reward badge at far right
             const pointsBadge = document.createElement('div');
-            pointsBadge.className = `text-xs font-extrabold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0 select-none ${
+            pointsBadge.className = `text-xs font-extrabold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg flex items-center gap-1 shrink-0 select-none ${
                 isCompleted ? 'bg-slate-100 text-slate-400' : 'bg-amber-50 text-amber-600 group-hover:bg-amber-100/60'
             }`;
             pointsBadge.innerHTML = `<i class="fa-solid fa-star text-[10px]"></i><span>+${task.points}</span>`;
 
-            // Inline action controls (visible on card hover)
+            // Inline action controls (Highly responsive hover state)
             const actionsDiv = document.createElement('div');
-            actionsDiv.className = "flex items-center space-x-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150 shrink-0";
+            // Show inline editing triggers permanently on touch screens, and hover on desktop
+            actionsDiv.className = "flex items-center space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150 shrink-0";
 
             const editBtn = document.createElement('button');
             editBtn.type = "button";
             editBtn.title = "Edit Chore";
-            editBtn.className = "w-7 h-7 rounded-lg bg-slate-100 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition flex items-center justify-center text-xs";
+            editBtn.className = "w-7 h-7 rounded-lg bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 border border-slate-200/50 sm:border-none transition flex items-center justify-center text-xs";
             editBtn.innerHTML = `<i class="fa-solid fa-pen"></i>`;
             editBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -1046,7 +1098,7 @@
             const deleteBtn = document.createElement('button');
             deleteBtn.type = "button";
             deleteBtn.title = "Delete Chore";
-            deleteBtn.className = "w-7 h-7 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs";
+            deleteBtn.className = "w-7 h-7 rounded-lg bg-slate-50 text-slate-500 hover:bg-rose-50 hover:text-rose-600 border border-slate-200/50 sm:border-none transition flex items-center justify-center text-xs";
             deleteBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
             deleteBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -1263,9 +1315,13 @@
 
         // Update overall completion stats & profile points/streaks
         function updateDashboardMetrics() {
-            // Update scores & streaks
+            // Update scores & streaks for desktop
             document.getElementById('score-display').innerText = appState.score;
             document.getElementById('streak-display').querySelector('span').innerText = `${appState.streak} days`;
+
+            // Update scores & streaks for mobile header
+            document.getElementById('mobile-score-display').innerText = appState.score;
+            document.getElementById('mobile-streak-display').querySelector('span').innerText = `${appState.streak}d`;
 
             // Calculate active lists metrics
             const activeEssentials = appState.essentials || [];
